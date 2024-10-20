@@ -12,14 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UNKNOWN"
         tools:targetApi="31">
-
-
+        <activity
+            android:name="com.example.anonposts.UnknownActivity"
+            android:exported="false" />
         <activity
             android:name=".SignUpCreate"
             android:exported="false" />
-        <activity
-            android:name=".SignUpActivity"
-            />
+        <activity android:name=".SignUpActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

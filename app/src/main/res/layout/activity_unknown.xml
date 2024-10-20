@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -23,7 +22,9 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
             android:contentDescription="Menu"
-            android:src="@drawable/menu_pic" />
+            android:src="@drawable/menu_pic"
+            android:clickable="true"
+            android:focusable="true" /> <!-- Made clickable -->
 
         <!-- Title (TextView) -->
         <TextView
@@ -55,7 +56,7 @@
 
         <!-- Input field for post -->
         <EditText
-            android:id="@+id/EditTextPost"
+            android:id="@+id/edit_text_post"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -73,12 +74,12 @@
 
     <!-- Post button -->
     <Button
-        android:id="@+id/ButtonPost"
+        android:id="@+id/button_Post"
         android:layout_width="113dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="20dp"
-        android:background="#00796B"
+        android:background="#00CCFF"
         android:text="Post"
         android:textColor="#3C3B3B" />
 
@@ -99,7 +100,7 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
-            android:id="@+id/LinearLayoutFirstPost"
+            android:id="@+id/linear_layout_first_post"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -156,22 +157,7 @@
                 android:layout_marginTop="8dp"
                 android:gravity="end">
 
-                <!-- Like Button -->
-                <ImageView
-                    android:id="@+id/likeButtonFirstPost"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/like_icon"
-                    android:contentDescription="Like"/>
 
-                <!-- Dislike Button -->
-                <ImageView
-                    android:id="@+id/dislikeButtonFirstPost"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/dislike_icon"
-                    android:layout_marginStart="16dp"
-                    android:contentDescription="Dislike"/>
 
                 <!-- Comment Button -->
                 <ImageView
@@ -180,7 +166,9 @@
                     android:layout_height="32dp"
                     android:src="@drawable/comment_icon"
                     android:layout_marginStart="16dp"
-                    android:contentDescription="Comment"/>
+                    android:contentDescription="Comment"
+                    android:clickable="true"
+                    android:focusable="true"/> <!-- Made clickable -->
             </LinearLayout>
 
         </LinearLayout>
@@ -250,22 +238,7 @@
                 android:gravity="end"
                 android:orientation="horizontal"> <!-- Align buttons to the right -->
 
-                <!-- Like Button -->
-                <ImageView
-                    android:id="@+id/likeButtonSecondPost"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:contentDescription="Like"
-                    android:src="@drawable/like_icon" />
 
-                <!-- Dislike Button -->
-                <ImageView
-                    android:id="@+id/dislikeButtonSecondPost"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="16dp"
-                    android:contentDescription="Dislike"
-                    android:src="@drawable/dislike_icon" />
 
                 <!-- Comment Button -->
                 <ImageView
@@ -274,7 +247,9 @@
                     android:layout_height="32dp"
                     android:layout_marginStart="16dp"
                     android:contentDescription="Comment"
-                    android:src="@drawable/comment_icon" />
+                    android:src="@drawable/comment_icon"
+                    android:clickable="true"
+                    android:focusable="true"/> <!-- Made clickable -->
             </LinearLayout>
 
         </LinearLayout>

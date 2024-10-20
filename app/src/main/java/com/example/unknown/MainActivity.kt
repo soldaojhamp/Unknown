@@ -9,6 +9,8 @@ import androidx.core.view.WindowInsetsCompat
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
+import com.example.anonposts.UnknownActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +30,24 @@ class MainActivity : AppCompatActivity() {
         val passwordEditText: EditText = findViewById(R.id.password_edit_text)
         val signInButton: Button = findViewById(R.id.sign_in_button)
         val dontHaveAccountTextView: TextView = findViewById(R.id.dont_have_account_text)
-        val signUpButton: Button = findViewById(R.id.sign_up_button)
+        val signUpButton: TextView = findViewById(R.id.sign_up_text)
+
+        // Set up click listener for Sign In button
+        signInButton.setOnClickListener {
+            // Validate input
+            val email = emailEditText.text.toString().trim()
+            val password = passwordEditText.text.toString().trim()
+
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please enter your email and password", Toast.LENGTH_SHORT).show()
+            } else {
+                // Show a toast message and navigate to UnknownActivity on successful sign-in
+                Toast.makeText(this, "Signing in...", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@MainActivity, UnknownActivity::class.java)
+                startActivity(intent)
+                finish() // Optional: finish this activity to prevent going back
+            }
+        }
 
         // Set up click listener for Sign Up button
         signUpButton.setOnClickListener {
@@ -36,7 +55,5 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this@MainActivity, SignUpActivity::class.java)
             startActivity(intent)
         }
-
-        // Set up listeners or actions if needed for other views
     }
 }

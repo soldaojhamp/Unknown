@@ -3,25 +3,27 @@ package com.example.anonposts
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.unknown.R
+import com.example.anonposts.UnknownActivity
+
 
 class UnknownActivity : AppCompatActivity() {
-
     private lateinit var editTextPost: EditText
     private lateinit var buttonPost: Button
     private lateinit var linearLayoutPosts: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_unknown)
 
         // Ensure the IDs match your layout file
-        editTextPost = findViewById(R.id.EditTextPost) // Correct ID reference
-        buttonPost = findViewById(R.id.ButtonPost)
-        linearLayoutPosts = findViewById(R.id.LinearLayoutFirstPost)
+        editTextPost = findViewById(R.id.edit_text_post)
+        buttonPost = findViewById(R.id.button_Post)
+        linearLayoutPosts = findViewById(R.id.linear_layout_first_post)
 
         buttonPost.setOnClickListener {
             val postContent = editTextPost.text.toString().trim()
@@ -70,9 +72,37 @@ class UnknownActivity : AppCompatActivity() {
             }
         }
 
-        // Add TextViews to the new post layout
+        // Create a LinearLayout for buttons
+        val buttonsLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setPadding(0, 8, 0, 0) // Add padding for buttons
+        }
+
+
+
+        // Create Comment Button
+        val commentButton = ImageView(this).apply {
+            setImageResource(R.drawable.comment_icon) // Replace with your comment icon
+            contentDescription = "Comment"
+            layoutParams = LinearLayout.LayoutParams(32, 32)
+            setOnClickListener {
+                // Handle comment button click
+                // For example, open a comment dialog or activity
+            }
+        }
+
+        // Add buttons to the buttons layout
+
+        buttonsLayout.addView(commentButton)
+
+        // Add TextViews and buttons to the new post layout
         newPostView.addView(usernameTextView)
         newPostView.addView(postContentTextView)
+        newPostView.addView(buttonsLayout)
 
         // Add the new post to the linear layout for recent posts
         linearLayoutPosts.addView(newPostView)
