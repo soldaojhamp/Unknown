@@ -67,6 +67,7 @@
         android:id="@+id/sign_up_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/Electric_blue"
         android:text="Sign Up"
         android:layout_below="@id/create_nickname_edit_text"
         android:layout_marginTop="24dp" />
