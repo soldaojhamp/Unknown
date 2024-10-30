@@ -71,7 +71,7 @@
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
                         android:gravity="center"
-                        android:text="Ano pa magandang i suggest ni Mond para samin?"
+                        android:text="What are your suggestion/s for this application?"
                         android:textSize="16sp" />
 
                     <!-- Suggestion EditText -->

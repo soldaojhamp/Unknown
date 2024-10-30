@@ -3,17 +3,9 @@
     tools:showIn="navigation_view">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/baseline_home_24"
-            android:title="Home" />
-        <item
             android:id="@+id/nav_profile"
             android:icon="@drawable/baseline_person_24"
             android:title="Profile" />
-        <item
-            android:id="@+id/nav_dark_mode"
-            android:icon="@drawable/baseline_dark_mode_24"
-            android:title="Dark Mode" />
         <item
             android:id="@+id/nav_about_us"
             android:icon="@drawable/baseline_fact_check_24"

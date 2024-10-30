@@ -2,6 +2,7 @@ package com.example.unknown
 
 import com.example.unknown.FeedbackFormActivity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -11,7 +12,17 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.example.unknown.api.Comment
+import com.example.unknown.api.CommentResponse
+import com.example.unknown.api.Post
+import com.example.unknown.api.UnknownInterface
 import com.google.android.material.navigation.NavigationView
+import okhttp3.OkHttpClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class UnknownActivity : AppCompatActivity() {
 
@@ -21,6 +32,9 @@ class UnknownActivity : AppCompatActivity() {
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var hamburgerButton: ImageView
     private lateinit var navigationView: NavigationView
+    private lateinit var sharedPreferences: SharedPreferences
+    private var userid: Int = 0
+    private var token: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,12 +47,19 @@ class UnknownActivity : AppCompatActivity() {
         drawerLayout = findViewById(R.id.drawerLayout)
         hamburgerButton = findViewById(R.id.hamburgerButton)
         navigationView = findViewById(R.id.navigationView)
+        sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        userid = sharedPreferences.getInt("id", 0)
+        token = sharedPreferences.getString("auth_token", null)
+
+        token?.let {
+            getPosts(it) // Pass the token to getPosts
+        }
 
         buttonPost.setOnClickListener {
             val postContent = editTextPost.text.toString().trim()
 
             if (postContent.isNotEmpty()) {
-                addPost(postContent)
+                token?.let { it1 -> createPost(postContent, it1) }
                 editTextPost.text.clear() // Clear input after posting
             }
         }
@@ -58,11 +79,9 @@ class UnknownActivity : AppCompatActivity() {
                     val intent = Intent(this, Profile::class.java)
                     startActivity(intent)
                 }
-                R.id.termsTextView -> {
-                    val intent = Intent(this, Terms_policy::class.java)
-                    startActivity(intent)
-                }
                 R.id.nav_logout -> {
+                    val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+                    sharedPref.edit().clear().apply()
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
                 }
@@ -80,7 +99,155 @@ class UnknownActivity : AppCompatActivity() {
         }
     }
 
-    private fun addPost(content: String) {
+    private fun getPosts(token: String) {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
+        val retrofitBuilder = Retrofit.Builder()
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://exact-guinea-nearby.ngrok-free.app/")
+            .build()
+            .create(UnknownInterface::class.java)
+        retrofitBuilder.getPosts().enqueue(object: Callback<List<Post>> {
+            override fun onResponse(p0: Call<List<Post>>, p1: Response<List<Post>>) {
+                if (p1.isSuccessful) {
+                    val responseBody = p1.body()
+
+                    if (responseBody != null) {
+                        for (post in responseBody) {
+                            val content = post.post
+                            val id = post.id
+
+                            addPost(content, id)
+                        }
+                    }
+                } else {
+                    Toast.makeText(this@UnknownActivity, "Fetching posts failed.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(p0: Call<List<Post>>, p1: Throwable) {
+                Toast.makeText(this@UnknownActivity, "Fetching posts failed.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun createPost(post: String, token: String) {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
+        val retrofitBuilder = Retrofit.Builder()
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://exact-guinea-nearby.ngrok-free.app/")
+            .build()
+            .create(UnknownInterface::class.java)
+
+        retrofitBuilder.post(post).enqueue(object: Callback<Post> {
+            override fun onResponse(p0: Call<Post>, p1: Response<Post>) {
+                if (p1.isSuccessful) {
+                    val response = p1.body()
+                    val token = response?.token
+                    val id = response?.id
+
+                    Log.d("Token", "$token")
+
+                    if (token != null && id != null) {
+                        addPost(post, id)
+                    }
+                } else {
+                    val error = p1.errorBody()?.string()
+                    Log.e("Error", "$error")
+                    Toast.makeText(this@UnknownActivity, "Creating post failed.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(p0: Call<Post>, p1: Throwable) {
+                Toast.makeText(this@UnknownActivity, "Creating post failed.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun deletePost(id: Int, token: String) {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
+        val retrofitBuilder = Retrofit.Builder()
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://exact-guinea-nearby.ngrok-free.app/")
+            .build()
+            .create(UnknownInterface::class.java)
+
+        retrofitBuilder.deletePost("Bearer $token",id).enqueue(object: Callback<Void> {
+            override fun onResponse(p0: Call<Void>, p1: Response<Void>) {
+                if (p1.isSuccessful) {
+                    Toast.makeText(this@UnknownActivity, "Successfully deleted post", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@UnknownActivity, "Failed to delete post", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(p0: Call<Void>, p1: Throwable) {
+                Toast.makeText(this@UnknownActivity, "An internet error occured", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
+    private fun deleteComment(token: String, id: Int) {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
+        val retrofitBuilder = Retrofit.Builder()
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://exact-guinea-nearby.ngrok-free.app/")
+            .build()
+            .create(UnknownInterface::class.java)
+
+        retrofitBuilder.deleteComment("Bearer $token", id).enqueue(object: Callback<Void> {
+            override fun onResponse(p0: Call<Void>, p1: Response<Void>) {
+                if (p1.isSuccessful) {
+                    Toast.makeText(this@UnknownActivity, "Successfully deleted comment.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@UnknownActivity, "Unable to delete comment", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(p0: Call<Void>, p1: Throwable) {
+                Toast.makeText(this@UnknownActivity, "An internet error occured", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
+    private fun addPost(content: String, id: Int) {
         // Create a new post container (LinearLayout with padding)
         val postContainer = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -167,6 +334,7 @@ class UnknownActivity : AppCompatActivity() {
                 setMargins(8, 0, 0, 0)
             }
             setOnClickListener {
+                //deletePost( id)
                 linearLayoutPosts.removeView(postContainer) // Remove the post when clicked
             }
         }
@@ -195,6 +363,8 @@ class UnknownActivity : AppCompatActivity() {
             isVerticalScrollBarEnabled = false
             addView(commentContainer) // Add comment container to ScrollView
         }
+
+        getComments(commentContainer, id)
 
         // Create a layout for adding comments
         val commentLayout = LinearLayout(this).apply {
@@ -229,7 +399,7 @@ class UnknownActivity : AppCompatActivity() {
             setOnClickListener {
                 val commentContent = editTextComment.text.toString().trim()
                 if (commentContent.isNotEmpty()) {
-                    addComment(commentContainer, commentContent, "YourUsername") // Pass a username
+                    createComment(commentContent, id, commentContainer) // Pass a username
                     editTextComment.text.clear() // Clear the comment input after posting
                 }
             }
@@ -259,7 +429,7 @@ class UnknownActivity : AppCompatActivity() {
         linearLayoutPosts.addView(postContainer, 0)
     }
 
-    private fun addComment(commentContainer: LinearLayout, content: String, username: String) {
+    private fun addComment(commentContainer: LinearLayout, content: String, postId: Int, token: String) {
         // Create a horizontal layout for the comment and delete button
         val commentLayout = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -282,7 +452,7 @@ class UnknownActivity : AppCompatActivity() {
 
         // Create TextView for username
         val usernameTextView = TextView(this).apply {
-            text = username // Dynamic username
+            text = "Anonymous" // Dynamic username
             textSize = 14f
             setTextColor(Color.BLACK)
         }
@@ -310,6 +480,7 @@ class UnknownActivity : AppCompatActivity() {
                 setMargins(8, 0, 0, 0) // Margin for positioning
             }
             setOnClickListener {
+               // deleteComment("Bearer $token", id)
                 commentContainer.removeView(commentLayout) // Remove the comment when clicked
             }
         }
@@ -320,6 +491,84 @@ class UnknownActivity : AppCompatActivity() {
 
         // Add the comment layout to the comment container
         commentContainer.addView(commentLayout)
+    }
+
+    private fun getComments(container: LinearLayout, postId: Int) {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
+        val retrofitBuilder = Retrofit.Builder()
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://exact-guinea-nearby.ngrok-free.app/")
+            .build()
+            .create(UnknownInterface::class.java)
+
+        retrofitBuilder.getComments("Bearer $token", postId).enqueue(object: Callback<List<Comment>> {
+            override fun onResponse(p0: Call<List<Comment>>, p1: Response<List<Comment>>) {
+                if (p1.isSuccessful) {
+                    val comments = p1.body()
+
+                    if (comments != null) {
+                        for (comment in comments) {
+                            token?.let { addComment(container, comment.comment, comment.id, it) }
+                        }
+                    }
+                } else {
+                    val errorResponse = p1.errorBody()?.string()
+                    Log.d("Error", "$errorResponse")
+                    Toast.makeText(this@UnknownActivity, "Failed to fetch comments", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(p0: Call<List<Comment>>, p1: Throwable) {
+                Toast.makeText(this@UnknownActivity, "Failed to fetch comments.", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
+    private fun createComment(comment: String, postId: Int, commentContainer: LinearLayout) {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
+        val retrofitBuilder = Retrofit.Builder()
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://exact-guinea-nearby.ngrok-free.app/")
+            .build()
+            .create(UnknownInterface::class.java)
+
+        retrofitBuilder.comment("Bearer $token", postId, comment).enqueue(object: Callback<CommentResponse> {
+            override fun onResponse(call: Call<CommentResponse>, response: Response<CommentResponse>) {
+                if (response.isSuccessful) {
+                    commentContainer.removeAllViews()
+                    getComments(commentContainer, postId)
+
+                    Toast.makeText(this@UnknownActivity, "Comment posted successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    val error = response.errorBody()?.string()
+                    Log.e("CommentError", "$error")
+                    Toast.makeText(this@UnknownActivity, "Failed to post comment", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<CommentResponse>, t: Throwable) {
+                Toast.makeText(this@UnknownActivity, "Failed to post comment", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
 

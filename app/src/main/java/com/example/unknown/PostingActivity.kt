@@ -27,28 +27,6 @@ class PostingActivity : AppCompatActivity() {
         // Enable the hamburger icon in the toolbar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
-
-        // Example: Add custom click listener to open drawer
-        val hamburgerIcon: ImageView = findViewById(R.id.hamburgerButton) // Assuming you have a custom ImageView for hamburger
-        hamburgerIcon.setOnClickListener {
-            drawerLayout.openDrawer(findViewById<NavigationView>(R.id.nav_view)) // Open navigation drawer
-        }
-
-        // Handle navigation item clicks
-        val navigationView: NavigationView = findViewById(R.id.nav_view)
-        navigationView.setNavigationItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    // Handle Home menu item
-                }
-                R.id.nav_profile -> {
-                    // Handle Profile menu item
-                }
-                // Other menu items
-            }
-            drawerLayout.closeDrawers() // Close the drawer after selection
-            true
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
